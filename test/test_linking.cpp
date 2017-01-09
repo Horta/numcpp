@@ -1,4 +1,4 @@
-#include "numcpp/numcpp.h"
+#include "numcpp/numcpp.hpp"
 
 int main()
 {
