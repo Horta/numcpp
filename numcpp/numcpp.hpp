@@ -1,12 +1,36 @@
 #ifndef NUMCPP_H
 #define NUMCPP_H
 
-namespace nc {
+#include <valarray>
+#include <iostream>
+
+namespace numcpp {
+
+using std::valarray;
+using std::size_t;
 
 class Array {
-private:
 public:
+  valarray<double> data;
+
+  Array(size_t size) : data(size) {}
 };
+
+inline decltype(auto) make_empty(size_t size)
+{
+  return Array(size);
+}
+
+inline std::ostream &operator<<(std::ostream &o, const Array& arr)
+{
+  o << '[';
+  for (const auto& v : arr.data)
+  {
+    o << v << " ";
+  }
+  o << '\b' << "]";
+  return o;
+}
 
 // # Array attributes
 // ndarray.flags	Information about the memory layout of the array.
