@@ -14,6 +14,8 @@ public:
   valarray<double> data;
 
   Array(size_t size) : data(size) {}
+
+  void fill(double v) { data = v; }
 };
 
 inline decltype(auto) make_empty(size_t size)

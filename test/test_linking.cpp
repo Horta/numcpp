@@ -13,5 +13,9 @@ int main()
 
   cout << A << endl;
 
+  A.fill(2.3);
+
+  cout << A << endl;
+
   return 0;
 }
