@@ -2,11 +2,35 @@
 #define NUMCPP_H
 
 #include <iostream>
+#include <list>
+#include <numeric>
 #include <valarray>
 
 namespace numcpp {
 
 using std::valarray;
+using std::gslice_array;
+using std::list;
+using std::inner_product;
+
+template <class T> inline T reduce_product(const list<T> &values) {
+  T result = 1;
+  for (const auto &v : values) {
+    result *= v;
+  }
+  return result;
+}
+
+using shape_t = list<size_t>;
+
+class Matrix {
+public:
+  valarray<double> data;
+  const shape_t &shape;
+
+  Matrix(const shape_t &shape)
+      : data(reduce_product(shape)), shape(shape) {}
+};
 
 class Array {
 public:
@@ -14,30 +38,32 @@ public:
 
   Array(size_t size) : data(size) {}
   Array(double val, size_t size) : data(val, size) {}
-  Array(Array&& arr) noexcept : data(std::move(arr.data)) { }
-  Array(valarray<double>&& varr) noexcept : data(std::move(varr)) { }
+  Array(Array &&arr) noexcept : data(std::move(arr.data)) {}
+  Array(valarray<double> &&varr) noexcept : data(std::move(varr)) {}
 
   void fill(double v) { data = v; }
   size_t size(void) const { return data.size(); }
 };
 
-Array operator+(const Array& lhs, const Array& rhs) {
+Array operator+(const Array &lhs, const Array &rhs) {
   return Array{lhs.data + rhs.data};
 }
 
-Array operator-(const Array& lhs, const Array& rhs) {
+Array operator-(const Array &lhs, const Array &rhs) {
   return Array{lhs.data - rhs.data};
 }
 
-Array operator*(const Array& lhs, const Array& rhs) {
+Array operator*(const Array &lhs, const Array &rhs) {
   return Array{lhs.data * rhs.data};
 }
 
-Array operator/(const Array& lhs, const Array& rhs) {
+Array operator/(const Array &lhs, const Array &rhs) {
   return Array{lhs.data / rhs.data};
 }
 
 inline decltype(auto) make_empty(size_t size) { return Array(size); }
+inline decltype(auto) make_empty(const shape_t &shape) { return Matrix(shape); }
+
 inline decltype(auto) make_zeros(size_t size) { return Array(0, size); }
 
 inline std::ostream &operator<<(std::ostream &o, const Array &arr) {
