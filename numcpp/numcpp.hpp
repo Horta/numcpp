@@ -1,33 +1,48 @@
 #ifndef NUMCPP_H
 #define NUMCPP_H
 
-#include <valarray>
 #include <iostream>
+#include <valarray>
 
 namespace numcpp {
 
 using std::valarray;
-using std::size_t;
 
 class Array {
 public:
   valarray<double> data;
 
   Array(size_t size) : data(size) {}
+  Array(double val, size_t size) : data(val, size) {}
+  Array(Array&& arr) noexcept : data(std::move(arr.data)) { }
+  Array(valarray<double>&& varr) noexcept : data(std::move(varr)) { }
 
   void fill(double v) { data = v; }
+  size_t size(void) const { return data.size(); }
 };
 
-inline decltype(auto) make_empty(size_t size)
-{
-  return Array(size);
+Array operator+(const Array& lhs, const Array& rhs) {
+  return Array{lhs.data + rhs.data};
 }
 
-inline std::ostream &operator<<(std::ostream &o, const Array& arr)
-{
+Array operator-(const Array& lhs, const Array& rhs) {
+  return Array{lhs.data - rhs.data};
+}
+
+Array operator*(const Array& lhs, const Array& rhs) {
+  return Array{lhs.data * rhs.data};
+}
+
+Array operator/(const Array& lhs, const Array& rhs) {
+  return Array{lhs.data / rhs.data};
+}
+
+inline decltype(auto) make_empty(size_t size) { return Array(size); }
+inline decltype(auto) make_zeros(size_t size) { return Array(0, size); }
+
+inline std::ostream &operator<<(std::ostream &o, const Array &arr) {
   o << '[';
-  for (const auto& v : arr.data)
-  {
+  for (const auto &v : arr.data) {
     o << v << " ";
   }
   o << '\b' << "]";
@@ -53,7 +68,8 @@ inline std::ostream &operator<<(std::ostream &o, const Array& arr)
 // ndarray.fill(value)	Fill the array with a scalar value.
 //
 // ## Shape manipulation
-// ndarray.reshape(shape[, order])	Returns an array containing the same data
+// ndarray.reshape(shape[, order])	Returns an array containing the same
+// data
 // with a new shape.
 // ndarray.resize(new_shape[, refcheck])	Change shape and size of array
 // in-place.
