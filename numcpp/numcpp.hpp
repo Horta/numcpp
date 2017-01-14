@@ -70,14 +70,9 @@ public:
       : gslice(std::move(matrix.gslice)), data(std::move(matrix.data)) {}
 
   Matrix(const shape_t &shape)
-      : gslice(0, va<size_t>{shape},
-               va<size_t>(sizeof(double), shape.size())),
+      : gslice(0, va<size_t>{shape}, va<size_t>(sizeof(double), shape.size())),
         data(make_shared<va<double>>(
-            product<size_t>(shape.begin(), shape.end()))) {
-
-              std::cout << "aqui" << std::endl;
-              std::cout << shape.size() << std::endl;
-            }
+            product<size_t>(shape.begin(), shape.end()))) {}
 
   size_t ndim(void) const { return gslice.size().size(); }
   operator double(void) const { return (*data)[0]; }

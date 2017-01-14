@@ -24,11 +24,6 @@ int main()
 
   Matrix matrix({10, 5});
 
-  cout << "matrix size " << matrix.size() << endl;
-  cout << "matrix size " << matrix.size() << endl;
-  cout << "matrix size " << matrix.size() << endl;
-  cout << "matrix size " << matrix.size() << endl;
-
   double v = matrix;
   cout << v << endl;
   matrix.fill(2.1);
