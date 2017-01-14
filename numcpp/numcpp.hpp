@@ -46,11 +46,19 @@ class Matrix;
 //   }
 // };
 
-struct slice {
+struct slice_t {
   size_t start;
   size_t end;
   size_t step;
 };
+
+template <class T>
+std::valarray<T> push_front(const T &v, const std::valarray<T> &arr) {
+  std::valarray<T> narr(arr.size() + 1);
+  narr[0] = v;
+  narr[std::slice(1, arr.size(), 1)] = arr;
+  return narr;
+}
 
 class Matrix {
 private:
@@ -75,30 +83,39 @@ public:
 
   size_t ndim(void) const { return gslice.size().size(); }
   operator double(void) const { return (*data)[0]; }
-  Matrix operator()(slice sl...) {
 
-    va_list slices;
-    va_start(slices, sl);
+  // template<class... Rest>
+  // std::gslice subselect(std::gslice gs, size_t first, Rest... rest) {
+  //   subselect(gs[1:], rest);
+  // }
+  //
+  template <class... Tail> std::gslice subselect(std::gslice gs, Tail... tail);
 
-    va<size_t> size(ndim());
-    va<size_t> stride(ndim());
+  template <class... Tail> std::gslice subselect(std::gslice gs) {
+    return std::gslice(gs.start(), va<size_t>(0), va<size_t>(0));
+  }
 
-    size_t start = gslice.start();
+  template <class Head, class... Tail>
+  std::gslice subselect(std::gslice gs, Head slice, Tail... tail) {
 
-    for (size_t i = 0; i < ndim(); ++i) {
+    size_t start = gs.start() + slice.start * gs.stride()[0];
 
-      start += sl.start * gslice.stride()[i];
+    size_t size = 1 + (((slice.end - slice.start) - 1) / slice.step);
 
-      size[i] = 1 + (((sl.end - sl.start) - 1) / sl.step);
+    size_t stride = gs.stride()[0] * slice.step;
 
-      stride[i] = gslice.stride()[i] * sl.step;
+    std::slice sl(1, gs.size().size(), 1);
+    std::gslice gs_tail(start, gs.size()[sl], gs.stride()[sl]);
 
-      sl = va_arg(slices, slice);
-    }
+    std::gslice new_gs(subselect(gs_tail, tail...));
 
-    va_end(slices);
+    return std::gslice(new_gs.start(), push_front(size, new_gs.size()),
+                       push_front(stride, new_gs.stride()));
+  }
 
-    return Matrix(std::gslice(start, size, stride), this->data);
+  template <class... Args> Matrix operator()(Args... args) {
+    std::gslice gs = subselect(gslice, args...);
+    return Matrix(gs, this->data);
   }
 
   void fill(double v) { *data = v; }
@@ -107,9 +124,7 @@ public:
     return product<size_t>(std::begin(size), std::end(size));
   }
 
-  shape_t shape(void) const {
-    return shape_t(gslice.size());
-  }
+  shape_t shape(void) const { return shape_t(gslice.size()); }
 };
 
 Matrix operator+(const Matrix &lhs, const Matrix &rhs) {
@@ -175,10 +190,10 @@ inline std::ostream &operator<<(std::ostream &o, const shape_t &shape) {
   for (const auto &v : shape) {
     o << v << ", ";
   }
-  o << "\b\b" << ")";
+  o << "\b\b"
+    << ")";
   return o;
 }
-
 
 // # Array attributes
 // ndarray.flags	Information about the memory layout of the array.

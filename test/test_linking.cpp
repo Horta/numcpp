@@ -21,8 +21,8 @@ int main()
   matrix.fill(2.1);
   v = matrix;
 
-  slice s0 = {0, 3, 1};
-  slice s1 = {0, 2, 1};
+  slice_t s0 = {0, 3, 1};
+  slice_t s1 = {0, 2, 1};
 
   cout << "ndim " << matrix.ndim() << endl;
   cout << "size " << matrix.size() << endl;
@@ -32,9 +32,9 @@ int main()
 
   cout << "ndim " << mat.ndim() << endl;
   cout << "size " << mat.size() << endl;
-  cout << "shape " << mat.shape() << endl;
-
-  cout << mat+mat << endl;
+  // cout << "shape " << mat.shape() << endl;
+  //
+  // cout << mat+mat << endl;
 
   return 0;
 }
