@@ -9,7 +9,6 @@
 
 namespace numcpp {
 
-using std::gslice_array;
 using std::list;
 using std::inner_product;
 using std::shared_ptr;
@@ -21,7 +20,7 @@ template <class T, class Iterator> T product(Iterator begin, Iterator end) {
   return std::accumulate(begin, end, 1, std::multiplies<T>());
 }
 
-using shape_t = std::initializer_list<size_t>;
+using shape_t = std::valarray<size_t>;
 
 class Matrix;
 
@@ -72,7 +71,7 @@ public:
   Matrix(const shape_t &shape)
       : gslice(0, va<size_t>{shape}, va<size_t>(sizeof(double), shape.size())),
         data(make_shared<va<double>>(
-            product<size_t>(shape.begin(), shape.end()))) {}
+            product<size_t>(std::begin(shape), std::end(shape)))) {}
 
   size_t ndim(void) const { return gslice.size().size(); }
   operator double(void) const { return (*data)[0]; }
@@ -106,6 +105,10 @@ public:
   size_t size(void) const {
     auto size = gslice.size();
     return product<size_t>(std::begin(size), std::end(size));
+  }
+
+  shape_t shape(void) const {
+    return shape_t(gslice.size());
   }
 };
 
@@ -151,6 +154,16 @@ inline std::ostream &operator<<(std::ostream &o, const Array &arr) {
   o << '\b' << "]";
   return o;
 }
+
+inline std::ostream &operator<<(std::ostream &o, const shape_t &shape) {
+  o << '(';
+  for (const auto &v : shape) {
+    o << v << ", ";
+  }
+  o << "\b\b" << ")";
+  return o;
+}
+
 
 // # Array attributes
 // ndarray.flags	Information about the memory layout of the array.

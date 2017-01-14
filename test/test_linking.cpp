@@ -12,34 +12,27 @@ int main()
   auto B = make_empty(4);
   auto C = make_zeros(4);
 
-  cout << A << endl;
-
   A.fill(2.3);
   B.fill(-1.0);
-
-  cout << A << endl;
-  cout << B << endl;
-  cout << A+B << endl;
-  cout << C << endl;
 
   Matrix matrix({10, 5});
 
   double v = matrix;
-  cout << v << endl;
   matrix.fill(2.1);
   v = matrix;
-  cout << v << endl;
 
   slice s0 = {0, 3, 1};
   slice s1 = {0, 2, 1};
 
-  cout << "matrix ndim " << matrix.ndim() << endl;
-  cout << "matrix size " << matrix.size() << endl;
+  cout << "ndim " << matrix.ndim() << endl;
+  cout << "size " << matrix.size() << endl;
+  cout << "shape " << matrix.shape() << endl;
 
   auto mat = matrix(s0, s1);
 
-  cout << "matrix ndim " << mat.ndim() << endl;
-  cout << "matrix size " << mat.size() << endl;
+  cout << "ndim " << mat.ndim() << endl;
+  cout << "size " << mat.size() << endl;
+  cout << "shape " << mat.shape() << endl;
 
   return 0;
 }
