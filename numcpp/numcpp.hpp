@@ -1,6 +1,7 @@
 #ifndef NUMCPP_H
 #define NUMCPP_H
 
+#include <cstdarg>
 #include <iostream>
 #include <list>
 #include <numeric>
@@ -8,10 +9,13 @@
 
 namespace numcpp {
 
-using std::valarray;
 using std::gslice_array;
 using std::list;
 using std::inner_product;
+using std::shared_ptr;
+using std::make_shared;
+
+template <class T> using va = std::valarray<T>;
 
 template <class T> inline T reduce_product(const list<T> &values) {
   T result = 1;
@@ -23,23 +27,89 @@ template <class T> inline T reduce_product(const list<T> &values) {
 
 using shape_t = list<size_t>;
 
-class Matrix {
-public:
-  valarray<double> data;
-  const shape_t &shape;
+class Matrix;
 
+// class MatrixBracketOp {
+// public:
+//   size_t index;
+//   size_t dim;
+//   const Matrix& matrix;
+//
+//   MatrixBracketOp(size_t index, const Matrix& matrix)
+//     : index(index), dim(0), matrix(matrix)
+//   {
+//   }
+//
+//   MatrixBracketOp(size_t index, const MatrixBracketOp& op)
+//     : index(index), dim(op.dim + 1), matrix(matrix)
+//   {
+//   }
+//
+//   MatrixBracketOp operator[](size_t index) const
+//   {
+//     return MatrixBracketOp(index, *this);
+//   }
+// };
+
+struct slice {
+  size_t start;
+  size_t end;
+  size_t step;
+};
+
+class Matrix {
+private:
+  std::gslice gslice;
+
+public:
+  shared_ptr<va<double>> data;
+
+private:
+  Matrix(std::gslice gslice, shared_ptr<va<double>> data)
+      : gslice(gslice), data(data) {}
+
+public:
   Matrix(const shape_t &shape)
-      : data(reduce_product(shape)), shape(shape) {}
+      : gslice(0, va<size_t>(shape.size()),
+               va<size_t>(sizeof(double), shape.size())),
+        data(make_shared<va<double>>(reduce_product(shape))) {}
+
+  size_t ndim(void) const { return gslice.size().size(); }
+  operator double(void) const { return (*data)[0]; }
+  Matrix operator()(slice sl...) {
+    va_list slices;
+    va_start(slices, sl);
+
+    va<size_t> size(ndim());
+    va<size_t> stride(ndim());
+
+    size_t start = gslice.start();
+
+    for (size_t i = 0; i < ndim(); ++i) {
+      slice s = va_arg(slices, slice);
+
+      start += s.start * gslice.stride()[i];
+      size[i] = 1 + (((s.end - s.start) - 1) / s.step);
+      stride[i] = gslice.stride()[i] * s.step;
+    }
+
+    va_end(slices);
+
+    return Matrix(std::gslice(start, size, stride), this->data);
+  }
+
+  void fill(double v) { *data = v; }
+  size_t size(void) const { return data->size(); }
 };
 
 class Array {
 public:
-  valarray<double> data;
+  va<double> data;
 
   Array(size_t size) : data(size) {}
   Array(double val, size_t size) : data(val, size) {}
   Array(Array &&arr) noexcept : data(std::move(arr.data)) {}
-  Array(valarray<double> &&varr) noexcept : data(std::move(varr)) {}
+  Array(va<double> &&varr) noexcept : data(std::move(varr)) {}
 
   void fill(double v) { data = v; }
   size_t size(void) const { return data.size(); }

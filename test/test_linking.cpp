@@ -22,5 +22,15 @@ int main()
   cout << A+B << endl;
   cout << C << endl;
 
+  Matrix matrix({10, 5});
+
+  double v = matrix;
+  cout << v << endl;
+  matrix.fill(2.1);
+  v = matrix;
+  cout << v << endl;
+
+  // matrix[slice(1, 3)][slice(0, 3)];
+
   return 0;
 }
