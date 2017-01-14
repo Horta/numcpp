@@ -84,11 +84,6 @@ public:
   size_t ndim(void) const { return gslice.size().size(); }
   operator double(void) const { return (*data)[0]; }
 
-  // template<class... Rest>
-  // std::gslice subselect(std::gslice gs, size_t first, Rest... rest) {
-  //   subselect(gs[1:], rest);
-  // }
-  //
   template <class... Tail> std::gslice subselect(std::gslice gs, Tail... tail);
 
   template <class... Tail> std::gslice subselect(std::gslice gs) {

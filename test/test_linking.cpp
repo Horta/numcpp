@@ -32,9 +32,9 @@ int main()
 
   cout << "ndim " << mat.ndim() << endl;
   cout << "size " << mat.size() << endl;
-  // cout << "shape " << mat.shape() << endl;
-  //
-  // cout << mat+mat << endl;
+  cout << "shape " << mat.shape() << endl;
+
+  cout << mat+mat << endl;
 
   return 0;
 }
