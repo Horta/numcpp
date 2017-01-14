@@ -69,6 +69,10 @@ private:
       : gslice(gslice), data(data) {}
 
 public:
+  Matrix(const Matrix &matrix) : gslice(matrix.gslice), data(matrix.data) {}
+  Matrix(Matrix &&matrix)
+      : gslice(std::move(matrix.gslice)), data(std::move(matrix.data)) {}
+
   Matrix(const shape_t &shape)
       : gslice(0, va<size_t>(shape.size()),
                va<size_t>(sizeof(double), shape.size())),
@@ -77,6 +81,7 @@ public:
   size_t ndim(void) const { return gslice.size().size(); }
   operator double(void) const { return (*data)[0]; }
   Matrix operator()(slice sl...) {
+
     va_list slices;
     va_start(slices, sl);
 
@@ -86,11 +91,14 @@ public:
     size_t start = gslice.start();
 
     for (size_t i = 0; i < ndim(); ++i) {
-      slice s = va_arg(slices, slice);
 
-      start += s.start * gslice.stride()[i];
-      size[i] = 1 + (((s.end - s.start) - 1) / s.step);
-      stride[i] = gslice.stride()[i] * s.step;
+      start += sl.start * gslice.stride()[i];
+
+      size[i] = 1 + (((sl.end - sl.start) - 1) / sl.step);
+
+      stride[i] = gslice.stride()[i] * sl.step;
+
+      sl = va_arg(slices, slice);
     }
 
     va_end(slices);
