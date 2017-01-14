@@ -112,6 +112,12 @@ public:
   }
 };
 
+Matrix operator+(const Matrix &lhs, const Matrix &rhs) {
+  Matrix m(lhs.shape());
+  *m.data = *lhs.data + *rhs.data;
+  return m;
+}
+
 class Array {
 public:
   va<double> data;
@@ -149,6 +155,15 @@ inline decltype(auto) make_zeros(size_t size) { return Array(0, size); }
 inline std::ostream &operator<<(std::ostream &o, const Array &arr) {
   o << '[';
   for (const auto &v : arr.data) {
+    o << v << " ";
+  }
+  o << '\b' << "]";
+  return o;
+}
+
+inline std::ostream &operator<<(std::ostream &o, const Matrix &mat) {
+  o << '[';
+  for (const auto &v : *mat.data) {
     o << v << " ";
   }
   o << '\b' << "]";

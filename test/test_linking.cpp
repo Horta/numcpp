@@ -34,5 +34,7 @@ int main()
   cout << "size " << mat.size() << endl;
   cout << "shape " << mat.shape() << endl;
 
+  cout << mat+mat << endl;
+
   return 0;
 }
