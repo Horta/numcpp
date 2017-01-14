@@ -24,6 +24,11 @@ int main()
 
   Matrix matrix({10, 5});
 
+  cout << "matrix size " << matrix.size() << endl;
+  cout << "matrix size " << matrix.size() << endl;
+  cout << "matrix size " << matrix.size() << endl;
+  cout << "matrix size " << matrix.size() << endl;
+
   double v = matrix;
   cout << v << endl;
   matrix.fill(2.1);
@@ -36,8 +41,10 @@ int main()
   cout << "matrix ndim " << matrix.ndim() << endl;
   cout << "matrix size " << matrix.size() << endl;
 
-  cout << "matrix ndim " << matrix(s0, s1).ndim() << endl;
-  // cout << "matrix size " << mat.size() << endl;
+  auto mat = matrix(s0, s1);
+
+  cout << "matrix ndim " << mat.ndim() << endl;
+  cout << "matrix size " << mat.size() << endl;
 
   return 0;
 }

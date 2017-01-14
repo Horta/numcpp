@@ -17,15 +17,11 @@ using std::make_shared;
 
 template <class T> using va = std::valarray<T>;
 
-template <class T> inline T reduce_product(const list<T> &values) {
-  T result = 1;
-  for (const auto &v : values) {
-    result *= v;
-  }
-  return result;
+template <class T, class Iterator> T product(Iterator begin, Iterator end) {
+  return std::accumulate(begin, end, 1, std::multiplies<T>());
 }
 
-using shape_t = list<size_t>;
+using shape_t = std::initializer_list<size_t>;
 
 class Matrix;
 
@@ -74,9 +70,14 @@ public:
       : gslice(std::move(matrix.gslice)), data(std::move(matrix.data)) {}
 
   Matrix(const shape_t &shape)
-      : gslice(0, va<size_t>(shape.size()),
+      : gslice(0, va<size_t>{shape},
                va<size_t>(sizeof(double), shape.size())),
-        data(make_shared<va<double>>(reduce_product(shape))) {}
+        data(make_shared<va<double>>(
+            product<size_t>(shape.begin(), shape.end()))) {
+
+              std::cout << "aqui" << std::endl;
+              std::cout << shape.size() << std::endl;
+            }
 
   size_t ndim(void) const { return gslice.size().size(); }
   operator double(void) const { return (*data)[0]; }
@@ -107,7 +108,10 @@ public:
   }
 
   void fill(double v) { *data = v; }
-  size_t size(void) const { return data->size(); }
+  size_t size(void) const {
+    auto size = gslice.size();
+    return product<size_t>(std::begin(size), std::end(size));
+  }
 };
 
 class Array {
