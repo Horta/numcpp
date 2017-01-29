@@ -16,14 +16,14 @@ using std::initializer_list;
 class Array {
 private:
   std::gslice gslice;
-  shared_ptr<valarray<double>> data;
   using array_type = valarray<double>;
 
 public:
+  shared_ptr<array_type> data;
   using value_type = double;
 
   Array(const Array &arr) : gslice{arr.gslice}, data{arr.data} {}
-  Array(Array &&arr)
+  Array(Array &&arr) noexcept
       : gslice{std::move(arr.gslice)}, data{std::move(arr.data)} {}
   Array(initializer_list<double> il)
       : gslice{0, {il.size()}, {1}}, data{make_shared<array_type>(il)} {}

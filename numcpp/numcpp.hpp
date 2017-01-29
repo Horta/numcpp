@@ -1,19 +1,20 @@
 #ifndef NUMCPP_HPP
 #define NUMCPP_HPP
 
-#include <cstdarg>
-#include <iostream>
-#include <iterator>
-#include <list>
-#include <numeric>
-#include <valarray>
+#include "array.hpp"
+#include "shape.hpp"
+#include "slice.hpp"
+#include "io.hpp"
 
 namespace numcpp {
 
-using std::list;
-using std::inner_product;
-using std::shared_ptr;
-using std::make_shared;
+inline decltype(auto) make_empty(const shape_t &shape) { return Array{shape}; }
+inline decltype(auto) make_zeros(const shape_t &shape)
+{
+  auto arr = Array{shape};
+  arr.fill(0);
+  return arr;
+}
 
 // class Matrix;
 //
@@ -31,19 +32,6 @@ using std::make_shared;
 //   return m;
 // }
 
-// class Array {
-// public:
-//   va<double> data;
-//
-//   Array(size_t size) : data(size) {}
-//   Array(double val, size_t size) : data(val, size) {}
-//   Array(Array &&arr) noexcept : data(std::move(arr.data)) {}
-//   Array(va<double> &&varr) noexcept : data(std::move(varr)) {}
-//
-//   void fill(double v) { data = v; }
-//   size_t size(void) const { return data.size(); }
-// };
-
 // Array operator+(const Array &lhs, const Array &rhs) {
 //   return Array{lhs.data + rhs.data};
 // }
@@ -60,11 +48,6 @@ using std::make_shared;
 //   return Array{lhs.data / rhs.data};
 // }
 //
-// inline decltype(auto) make_empty(size_t size) { return Array(size); }
-// inline decltype(auto) make_empty(const shape_t &shape) { return Matrix(shape); }
-//
-// inline decltype(auto) make_zeros(size_t size) { return Array(0, size); }
-//
 // inline std::ostream &operator<<(std::ostream &o, const Array &arr) {
 //   o << '[';
 //   for (const auto &v : arr.data) {
@@ -74,25 +57,6 @@ using std::make_shared;
 //   return o;
 // }
 //
-// inline std::ostream &operator<<(std::ostream &o, const Matrix &mat) {
-//   o << '[';
-//   for (const auto &v : *mat.data) {
-//     o << v << " ";
-//   }
-//   o << '\b' << "]";
-//   return o;
-// }
-//
-// inline std::ostream &operator<<(std::ostream &o, const shape_t &shape) {
-//   o << '(';
-//   for (const auto &v : shape) {
-//     o << v << ", ";
-//   }
-//   o << "\b\b"
-//     << ")";
-//   return o;
-// }
-
 // # Array attributes
 // ndarray.flags	Information about the memory layout of the array.
 // ndarray.shape	Tuple of array dimensions.

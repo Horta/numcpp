@@ -1,19 +1,17 @@
 #include "numcpp/numcpp.hpp"
 
-#include <iostream>
-
 using namespace numcpp;
 using std::cout;
 using std::endl;
 
 int main()
 {
-  // auto A = make_empty(4);
-  // auto B = make_empty(4);
-  // auto C = make_zeros(4);
-  //
-  // A.fill(2.3);
-  // B.fill(-1.0);
+  auto a = make_empty(shape_t{2, 2});
+  auto b = make_empty(shape_t{2, 2});
+  auto c = make_zeros(shape_t{2, 2});
+
+  a.fill(2.3);
+  b.fill(-1.0);
   //
   // Matrix matrix({10, 5});
   //
