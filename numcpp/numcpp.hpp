@@ -1,8 +1,9 @@
-#ifndef NUMCPP_H
-#define NUMCPP_H
+#ifndef NUMCPP_HPP
+#define NUMCPP_HPP
 
 #include <cstdarg>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <numeric>
 #include <valarray>
@@ -14,181 +15,83 @@ using std::inner_product;
 using std::shared_ptr;
 using std::make_shared;
 
-template <class T> using va = std::valarray<T>;
+// class Matrix;
+//
+// template <class T>
+// std::valarray<T> push_front(const T &v, const std::valarray<T> &arr) {
+//   std::valarray<T> narr(arr.size() + 1);
+//   narr[0] = v;
+//   narr[std::slice(1, arr.size(), 1)] = arr;
+//   return narr;
+// }
 
-template <class T, class Iterator> T product(Iterator begin, Iterator end) {
-  return std::accumulate(begin, end, 1, std::multiplies<T>());
-}
+// Matrix operator+(const Matrix &lhs, const Matrix &rhs) {
+//   Matrix m(lhs.shape());
+//   *m.data = *lhs.data + *rhs.data;
+//   return m;
+// }
 
-using shape_t = std::valarray<size_t>;
-
-class Matrix;
-
-// class MatrixBracketOp {
+// class Array {
 // public:
-//   size_t index;
-//   size_t dim;
-//   const Matrix& matrix;
+//   va<double> data;
 //
-//   MatrixBracketOp(size_t index, const Matrix& matrix)
-//     : index(index), dim(0), matrix(matrix)
-//   {
-//   }
+//   Array(size_t size) : data(size) {}
+//   Array(double val, size_t size) : data(val, size) {}
+//   Array(Array &&arr) noexcept : data(std::move(arr.data)) {}
+//   Array(va<double> &&varr) noexcept : data(std::move(varr)) {}
 //
-//   MatrixBracketOp(size_t index, const MatrixBracketOp& op)
-//     : index(index), dim(op.dim + 1), matrix(matrix)
-//   {
-//   }
-//
-//   MatrixBracketOp operator[](size_t index) const
-//   {
-//     return MatrixBracketOp(index, *this);
-//   }
+//   void fill(double v) { data = v; }
+//   size_t size(void) const { return data.size(); }
 // };
 
-struct slice_t {
-  size_t start;
-  size_t end;
-  size_t step;
-};
-
-template <class T>
-std::valarray<T> push_front(const T &v, const std::valarray<T> &arr) {
-  std::valarray<T> narr(arr.size() + 1);
-  narr[0] = v;
-  narr[std::slice(1, arr.size(), 1)] = arr;
-  return narr;
-}
-
-class Matrix {
-private:
-  std::gslice gslice;
-
-public:
-  shared_ptr<va<double>> data;
-
-private:
-  Matrix(std::gslice gslice, shared_ptr<va<double>> data)
-      : gslice(gslice), data(data) {}
-
-public:
-  Matrix(const Matrix &matrix) : gslice(matrix.gslice), data(matrix.data) {}
-  Matrix(Matrix &&matrix)
-      : gslice(std::move(matrix.gslice)), data(std::move(matrix.data)) {}
-
-  Matrix(const shape_t &shape)
-      : gslice(0, va<size_t>{shape}, va<size_t>(sizeof(double), shape.size())),
-        data(make_shared<va<double>>(
-            product<size_t>(std::begin(shape), std::end(shape)))) {}
-
-  size_t ndim(void) const { return gslice.size().size(); }
-  operator double(void) const { return (*data)[0]; }
-
-  template <class... Tail> std::gslice subselect(std::gslice gs, Tail... tail);
-
-  template <class... Tail> std::gslice subselect(std::gslice gs) {
-    return std::gslice(gs.start(), va<size_t>(0), va<size_t>(0));
-  }
-
-  template <class Head, class... Tail>
-  std::gslice subselect(std::gslice gs, Head slice, Tail... tail) {
-
-    size_t start = gs.start() + slice.start * gs.stride()[0];
-
-    size_t size = 1 + (((slice.end - slice.start) - 1) / slice.step);
-
-    size_t stride = gs.stride()[0] * slice.step;
-
-    std::slice sl(1, gs.size().size(), 1);
-    std::gslice gs_tail(start, gs.size()[sl], gs.stride()[sl]);
-
-    std::gslice new_gs(subselect(gs_tail, tail...));
-
-    return std::gslice(new_gs.start(), push_front(size, new_gs.size()),
-                       push_front(stride, new_gs.stride()));
-  }
-
-  template <class... Args> Matrix operator()(Args... args) {
-    std::gslice gs = subselect(gslice, args...);
-    return Matrix(gs, this->data);
-  }
-
-  void fill(double v) { *data = v; }
-  size_t size(void) const {
-    auto size = gslice.size();
-    return product<size_t>(std::begin(size), std::end(size));
-  }
-
-  shape_t shape(void) const { return shape_t(gslice.size()); }
-};
-
-Matrix operator+(const Matrix &lhs, const Matrix &rhs) {
-  Matrix m(lhs.shape());
-  *m.data = *lhs.data + *rhs.data;
-  return m;
-}
-
-class Array {
-public:
-  va<double> data;
-
-  Array(size_t size) : data(size) {}
-  Array(double val, size_t size) : data(val, size) {}
-  Array(Array &&arr) noexcept : data(std::move(arr.data)) {}
-  Array(va<double> &&varr) noexcept : data(std::move(varr)) {}
-
-  void fill(double v) { data = v; }
-  size_t size(void) const { return data.size(); }
-};
-
-Array operator+(const Array &lhs, const Array &rhs) {
-  return Array{lhs.data + rhs.data};
-}
-
-Array operator-(const Array &lhs, const Array &rhs) {
-  return Array{lhs.data - rhs.data};
-}
-
-Array operator*(const Array &lhs, const Array &rhs) {
-  return Array{lhs.data * rhs.data};
-}
-
-Array operator/(const Array &lhs, const Array &rhs) {
-  return Array{lhs.data / rhs.data};
-}
-
-inline decltype(auto) make_empty(size_t size) { return Array(size); }
-inline decltype(auto) make_empty(const shape_t &shape) { return Matrix(shape); }
-
-inline decltype(auto) make_zeros(size_t size) { return Array(0, size); }
-
-inline std::ostream &operator<<(std::ostream &o, const Array &arr) {
-  o << '[';
-  for (const auto &v : arr.data) {
-    o << v << " ";
-  }
-  o << '\b' << "]";
-  return o;
-}
-
-inline std::ostream &operator<<(std::ostream &o, const Matrix &mat) {
-  o << '[';
-  for (const auto &v : *mat.data) {
-    o << v << " ";
-  }
-  o << '\b' << "]";
-  return o;
-}
-
-inline std::ostream &operator<<(std::ostream &o, const shape_t &shape) {
-  o << '(';
-  for (const auto &v : shape) {
-    o << v << ", ";
-  }
-  o << "\b\b"
-    << ")";
-  return o;
-}
+// Array operator+(const Array &lhs, const Array &rhs) {
+//   return Array{lhs.data + rhs.data};
+// }
+//
+// Array operator-(const Array &lhs, const Array &rhs) {
+//   return Array{lhs.data - rhs.data};
+// }
+//
+// Array operator*(const Array &lhs, const Array &rhs) {
+//   return Array{lhs.data * rhs.data};
+// }
+//
+// Array operator/(const Array &lhs, const Array &rhs) {
+//   return Array{lhs.data / rhs.data};
+// }
+//
+// inline decltype(auto) make_empty(size_t size) { return Array(size); }
+// inline decltype(auto) make_empty(const shape_t &shape) { return Matrix(shape); }
+//
+// inline decltype(auto) make_zeros(size_t size) { return Array(0, size); }
+//
+// inline std::ostream &operator<<(std::ostream &o, const Array &arr) {
+//   o << '[';
+//   for (const auto &v : arr.data) {
+//     o << v << " ";
+//   }
+//   o << '\b' << "]";
+//   return o;
+// }
+//
+// inline std::ostream &operator<<(std::ostream &o, const Matrix &mat) {
+//   o << '[';
+//   for (const auto &v : *mat.data) {
+//     o << v << " ";
+//   }
+//   o << '\b' << "]";
+//   return o;
+// }
+//
+// inline std::ostream &operator<<(std::ostream &o, const shape_t &shape) {
+//   o << '(';
+//   for (const auto &v : shape) {
+//     o << v << ", ";
+//   }
+//   o << "\b\b"
+//     << ")";
+//   return o;
+// }
 
 // # Array attributes
 // ndarray.flags	Information about the memory layout of the array.
