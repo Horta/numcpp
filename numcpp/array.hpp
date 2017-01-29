@@ -18,8 +18,10 @@ private:
   std::gslice gslice;
   using array_type = valarray<double>;
 
-public:
-  shared_ptr<array_type> data;
+  Array(std::gslice gslice, shared_ptr<array_type> data)
+      : gslice{gslice}, data{data} {}
+
+public: shared_ptr<array_type> data;
   using value_type = double;
 
   Array(const Array &arr) : gslice{arr.gslice}, data{arr.data} {}
@@ -27,8 +29,6 @@ public:
       : gslice{std::move(arr.gslice)}, data{std::move(arr.data)} {}
   Array(initializer_list<double> il)
       : gslice{0, {il.size()}, {1}}, data{make_shared<array_type>(il)} {}
-  Array(std::gslice gslice, shared_ptr<array_type> data)
-      : gslice{gslice}, data{data} {}
   Array(const shape_t &shape)
       : gslice{make_gslice(shape)},
         data{make_shared<array_type>(product_reduce<shape_t::value_type>(
@@ -68,10 +68,10 @@ public:
   //                        push_front(stride, new_gs.stride()));
   //   }
   //
-  //   template <class... Args> Array operator()(Args... args) {
-  //     std::gslice gs = subselect(gslice, args...);
-  //     return Array(gs, this->data);
-  //   }
+  template <class... Args> Array operator()(Args... args) {
+    std::gslice gs = subselect(gslice, args...);
+    return Array{gs, data};
+  }
   //
 
   //
