@@ -12,6 +12,10 @@ int main()
 
   a.fill(2.3);
   b.fill(-1.0);
+
+  auto sl = slice{0, 1, 1};
+
+  // auto d = a(slice_t{0, 1, 1}, slice_t{0, 1, 1});
   //
   // Matrix matrix({10, 5});
   //

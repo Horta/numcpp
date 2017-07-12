@@ -13,6 +13,14 @@ using std::make_shared;
 using std::valarray;
 using std::initializer_list;
 
+template <class T>
+std::valarray<T> push_front(const T &v, const std::valarray<T> &arr) {
+  std::valarray<T> narr(arr.size() + 1);
+  narr[0] = v;
+  narr[std::slice(1, arr.size(), 1)] = arr;
+  return narr;
+}
+
 class Array {
 private:
   std::gslice gslice;
@@ -50,28 +58,29 @@ public: shared_ptr<array_type> data;
   //     return std::gslice(gs.start(), va<size_t>(0), va<size_t>(0));
   //   }
   //
-  //   template <class Head, class... Tail>
-  //   std::gslice subselect(std::gslice gs, Head slice, Tail... tail) {
-  //
-  //     size_t start = gs.start() + slice.start * gs.stride()[0];
-  //
-  //     size_t size = 1 + (((slice.end - slice.start) - 1) / slice.step);
-  //
-  //     size_t stride = gs.stride()[0] * slice.step;
-  //
-  //     std::slice sl(1, gs.size().size(), 1);
-  //     std::gslice gs_tail(start, gs.size()[sl], gs.stride()[sl]);
-  //
-  //     std::gslice new_gs(subselect(gs_tail, tail...));
-  //
-  //     return std::gslice(new_gs.start(), push_front(size, new_gs.size()),
-  //                        push_front(stride, new_gs.stride()));
-  //   }
-  //
-  template <class... Args> Array operator()(Args... args) {
-    std::gslice gs = subselect(gslice, args...);
-    return Array{gs, data};
-  }
+    // template <class T, class... Tail>
+    // std::gslice subselect(std::gslice gs, T slice, Tail... tail) {
+    //
+    //   size_t tail_start = gs.start() + slice.start * gs.stride()[0];
+    //
+    //   size_t tail_size = 1 + (((slice.end - slice.start) - 1) / slice.step);
+    //
+    //   size_t tail_stride = gs.stride()[0] * slice.step;
+    //
+    //   std::slice sl(1, gs.size().size(), 1);
+    //   std::gslice gs_tail(tail_start, gs.size()[sl], gs.stride()[sl]);
+    //
+    //   std::gslice new_gs(subselect(gs_tail, tail...));
+    //
+    //   return std::gslice(new_gs.start(), push_front(tail_size, new_gs.size()),
+    //                      push_front(tail_stride, new_gs.stride()));
+    // }
+
+  // template <class... Args> Array operator()(Args... args) {
+  //   // std::gslice gs = subselect(gslice, args...);
+  //   std::gslice gs = gslice;
+  //   return Array{gs, data};
+  // }
   //
 
   //
